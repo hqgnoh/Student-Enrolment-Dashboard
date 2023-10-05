@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
-import pickle
 from pathlib import Path
 import streamlit_authenticator as stauth
 import plotly.express as px

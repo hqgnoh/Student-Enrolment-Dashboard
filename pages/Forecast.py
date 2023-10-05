@@ -23,7 +23,7 @@ import plotly.graph_objects as go
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
-st.title('University Student Enrollment Dashboard')
+st.sidebar.title('University Student Enrollment Dashboard')
 
 #image = Image.open("/content/drive/MyDrive/ColabNotebooks/UCSI-Logo.png")
 #st.sidebar.image(image)
@@ -67,7 +67,7 @@ if authenticate_user():
     #Faculty of Business
     def page_faculty_business():
         st.title("Faculty of Business")
-        selected_department_business = st.selectbox("Select Department:", ["Marketing", "Accounting", "Business Administration"])
+        selected_department_business = st.sidebar.selectbox("Select Department:", ["Marketing", "Accounting", "Business Administration"])
 
         # Marketing Department
         def marketing():
@@ -94,10 +94,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -111,7 +112,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -123,7 +123,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -142,7 +143,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -163,7 +163,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -193,7 +194,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -216,31 +217,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         # Accounting Department
         def accounting():
@@ -267,10 +268,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -284,7 +286,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -296,7 +297,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -315,7 +317,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -336,7 +337,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -366,7 +368,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -389,31 +391,30 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+                # with st.spinner('Loading...'):
+                #     time.sleep(1)
+                #     st.header("Compare Models")
+                #     options = ['Prophet', 'Polynomial Regression', 'LSTM']
+                #     selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+                #
+                #     if 'Prophet' in selected_graphs:
+                #         st.subheader("Prophet")
+                #         fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+                #         st.plotly_chart(fig)
+                #
+                #     if 'Polynomial Regression' in selected_graphs:
+                #         st.subheader("Polynomial Regression")
+                #         fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+                #                       title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+                #         st.plotly_chart(fig)
+                #
+                #     if 'LSTM' in selected_graphs:
+                #         st.subheader("LSTM")
+                #         month_names = [month_abbr[month] for month in forecast_df['Month']]
+                #         fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+                #                       title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+                #         fig.update_layout(legend_title_text='Intake')
+                #         st.plotly_chart(fig)
 
         # Business Administration Department
         def business_admin():
@@ -440,10 +441,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -457,7 +459,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -469,7 +470,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -488,7 +490,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -509,7 +510,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -539,7 +541,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -562,31 +564,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         if selected_department_business == "Marketing":
             marketing()
@@ -600,7 +602,7 @@ if authenticate_user():
     #Faculty of Engineering
     def page_faculty_engineering():
         st.title("Faculty of Engineering")
-        selected_department_business = st.selectbox("Select Department:", ["Chemical", "Mechanical", "Electrical"])
+        selected_department_business = st.sidebar.selectbox("Select Department:", ["Chemical", "Mechanical", "Electrical"])
 
         # Chemical Engineering Department
         def chemical():
@@ -627,10 +629,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -644,7 +647,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -656,7 +658,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -675,7 +678,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -696,7 +698,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -726,7 +729,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -749,31 +752,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         # Mechanical Engineering Department
         def mechanical():
@@ -800,10 +803,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -817,7 +821,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -829,7 +832,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -848,7 +852,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -869,7 +872,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -899,7 +903,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -922,31 +926,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         # Electrical Engineering Department
         def electrical():
@@ -973,10 +977,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -990,7 +995,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -1002,7 +1006,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -1021,7 +1026,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -1042,7 +1046,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -1072,7 +1077,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -1095,31 +1100,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         if selected_department_business == "Chemical":
             chemical()
@@ -1133,7 +1138,7 @@ if authenticate_user():
     #Faculty of Computer Sciences
     def page_faculty_computer():
         st.title("Faculty of Computer Sciences")
-        selected_department_business = st.selectbox("Select Department:", ["Computer Science", "Data Science", "Mobile Networking"])
+        selected_department_business = st.sidebar.selectbox("Select Department:", ["Computer Science", "Data Science", "Mobile Networking"])
 
         # Computer Science Department
         def computer_science():
@@ -1160,10 +1165,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -1177,7 +1183,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -1189,7 +1194,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -1208,7 +1214,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -1229,7 +1234,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -1259,7 +1265,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -1282,31 +1288,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         # Data Science Department
         def data_science():
@@ -1333,10 +1339,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -1350,7 +1357,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -1362,7 +1368,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -1381,7 +1388,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -1402,7 +1408,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -1432,7 +1439,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -1455,31 +1462,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         # Mobile Networking Department
         def mobile_networking():
@@ -1506,10 +1513,11 @@ if authenticate_user():
                 student_data = fetch_student_data()
                 st.write(student_data)
 
-            st.write("Select the prediction model:")
-            tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
+            st.write("Prediction Models:")
+            # tab1, tab2, tab3, tab4 = st.tabs(["Prophet", "Polynomial Regression", "LSTM", "Compare Models"])
 
-            with tab1:
+            st.subheader('Prophet Model')
+            with st.expander("Click to expand"):
                 #Prophet
                 prophet_data = data.resample('M').sum()
                 prophet_data.reset_index(inplace=True)
@@ -1523,7 +1531,6 @@ if authenticate_user():
                 forecasted_values_prophet = forecast[forecast['ds'].dt.month.isin([1, 5, 9])]
                 forecasted_values_prophet = forecasted_values_prophet[['ds', 'yhat']].rename(columns={'yhat': 'Forecasted Enrollment'})
 
-                st.header('Prophet Model')
                 selected_semester = st.selectbox('Select Semester to forecast:', ['January', 'May', 'September'], key="prophet")
                 month_mapping = {'January': 1, 'May': 5, 'September': 9}
                 selected_month = month_mapping[selected_semester]
@@ -1535,7 +1542,8 @@ if authenticate_user():
                 fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab2:
+            st.subheader('Polynomial Regression')
+            with st.expander("Click to expand"):
                 #Polynomial
                 historical_data = data.resample('M').sum()
                 historical_data['Year'] = historical_data.index.year
@@ -1554,7 +1562,6 @@ if authenticate_user():
                         forecasted_values_poly.append((year, month, forecast[0]))
                 forecast_df = pd.DataFrame(forecasted_values_poly, columns=['Year', 'Month', 'Forecasted Enrollment'])
 
-                st.header('Polynomial Regression')
                 st.write('Polynomial Regression Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                 st.write(forecast_df)
                 selected_year = st.slider('Select Year', 2023, 2032, 2023, key="Polynomial")
@@ -1575,7 +1582,8 @@ if authenticate_user():
                               title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
                 st.plotly_chart(fig)
 
-            with tab3:
+            st.subheader('LSTM Model')
+            with st.expander("Click to expand"):
                 with st.spinner('Loading...'):
                     time.sleep(1)
                     filtered_data = data[data.index.month.isin([1, 5, 9])]
@@ -1605,7 +1613,7 @@ if authenticate_user():
 
                     forecast_df_LSTM = pd.DataFrame(forecasted_values_LSTM, columns=['Year', 'Month', 'Forecasted Enrollment'])
                     forecast_df_LSTM['Date'] = pd.to_datetime(forecast_df_LSTM[['Year', 'Month']].assign(day=1))
-                    st.header('LSTM Model')
+
                     st.write('LSTM Forecasted Enrollment for the Next {} Years - Jan, May, Sep:'.format(num_years))
                     st.write(forecast_df_LSTM)
                     selected_year = st.slider('Select Year', 2023, 2032, 2023, key="LSTM")
@@ -1628,31 +1636,31 @@ if authenticate_user():
                     fig.update_layout(legend_title_text='Intake')
                     st.plotly_chart(fig)
 
-            with tab4:
-                with st.spinner('Loading...'):
-                    time.sleep(1)
-                    st.header("Compare Models")
-                    options = ['Prophet', 'Polynomial Regression', 'LSTM']
-                    selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
-
-                    if 'Prophet' in selected_graphs:
-                        st.subheader("Prophet")
-                        fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'Polynomial Regression' in selected_graphs:
-                        st.subheader("Polynomial Regression")
-                        fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        st.plotly_chart(fig)
-
-                    if 'LSTM' in selected_graphs:
-                        st.subheader("LSTM")
-                        month_names = [month_abbr[month] for month in forecast_df['Month']]
-                        fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
-                                      title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
-                        fig.update_layout(legend_title_text='Intake')
-                        st.plotly_chart(fig)
+            # with st.expander("Click to expand"):
+            #     with st.spinner('Loading...'):
+            #         time.sleep(1)
+            #         st.header("Compare Models")
+            #         options = ['Prophet', 'Polynomial Regression', 'LSTM']
+            #         selected_graphs = st.multiselect("Select Graphs to Display", options, default=options)
+            #
+            #         if 'Prophet' in selected_graphs:
+            #             st.subheader("Prophet")
+            #             fig = px.line(forecasted_values_prophet, x='ds', y='Forecasted Enrollment', title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'Polynomial Regression' in selected_graphs:
+            #             st.subheader("Polynomial Regression")
+            #             fig = px.line(forecast_df, x='Year', y='Forecasted Enrollment',
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             st.plotly_chart(fig)
+            #
+            #         if 'LSTM' in selected_graphs:
+            #             st.subheader("LSTM")
+            #             month_names = [month_abbr[month] for month in forecast_df['Month']]
+            #             fig = px.line(forecast_df_LSTM, x='Year', y='Forecasted Enrollment', color=month_names,
+            #                           title='Forecasted Enrollment for Jan, May, and Sep Over the Years')
+            #             fig.update_layout(legend_title_text='Intake')
+            #             st.plotly_chart(fig)
 
         if selected_department_business == "Computer Science":
             computer_science()

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 import streamlit as st
 
-st.title('University Student Enrollment Dashboard')
+st.sidebar.title('University Student Enrollment Dashboard')
 
 def creds_entered():
     if st.session_state["user"].strip() == "admin" and st.session_state["passwd"].strip() == "admin":
@@ -37,6 +37,7 @@ def authenticate_user():
             return False
 
 if authenticate_user():
+    st.sidebar.success("Welcome admin!")
     st.sidebar.title("Insert Data Page")
 
     # Function to create a SQLite database connection
@@ -87,7 +88,7 @@ if authenticate_user():
     # def main():
     conn = create_connection()
     create_table(conn)
-    st.header("Student Enrollment Input Form")
+    st.title("Student Enrollment Input Form")
 
     # st.info("Please select the first day of the month when choosing the intake", icon="ℹ️")
     # intake = st.date_input("Select an Intake: (Intakes are in Jan, May, Sep)", format="YYYY-MM-DD")
